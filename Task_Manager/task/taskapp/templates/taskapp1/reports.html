@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - Task Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .report-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .report-card:hover {
+            transform: translateY(-2px);
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .stats-pending {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+        .stats-progress {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stats-completed {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+        .chart-container-large {
+            height: 400px;
+        }
+        .performance-item {
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .performance-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .performance-excellent { border-left-color: #28a745; }
+        .performance-good { border-left-color: #17a2b8; }
+        .performance-average { border-left-color: #ffc107; }
+        .performance-poor { border-left-color: #dc3545; }
+        
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            height: 100%;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .trend-up { color: #28a745; }
+        .trend-down { color: #dc3545; }
+        .trend-stable { color: #6c757d; }
+        
+        .date-range-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        .export-btn:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .priority-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        .priority-high { background-color: #dc3545; }
+        .priority-medium { background-color: #ffc107; }
+        .priority-low { background-color: #28a745; }
+        
+        .department-card {
+            border-left: 4px solid #007bff;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .department-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'admin_dashboard' %}">
+                <i class="fas fa-tasks me-2"></i>Task Manager - Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    Welcome, {{ user.get_full_name|default:user.username }}
+                </span>
+                <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'admin_dashboard' %}" class="text-decoration-none">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-chart-line me-1"></i>Reports & Analytics
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Reports & Analytics
+                </h2>
+                <p class="text-muted">Comprehensive task management insights and performance metrics</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn export-btn" onclick="exportReport('pdf')">
+                        <i class="fas fa-file-pdf me-1"></i>Export PDF
+                    </button>
+                    <button type="button" class="btn export-btn ms-1" onclick="exportReport('excel')">
+                        <i class="fas fa-file-excel me-1"></i>Export Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="card date-range-card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <h6 class="mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>Date Range
+                        </h6>
+                    </div>
+                    <div class="col-md-9">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="date" class="form-control" name="start_date" 
+                                       value="{{ start_date }}" id="startDate">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" class="form-control" name="end_date" 
+                                       value="{{ end_date }}" id="endDate">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-light me-2">
+                                    <i class="fas fa-search me-1"></i>Apply Filter
+                                </button>
+                                <a href="{% url 'reports' %}" class="btn btn-outline-light">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_tasks }}</h3>
+                            <p class="mb-0">Total Tasks</p>
+                        </div>
+                        <i class="fas fa-tasks fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card stats-pending">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ pending_tasks }}</h3>
+                            <p class="mb-0">Pending</p>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card stats-progress">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ in_progress_tasks }}</h3>
+                            <p class="mb-0">In Progress</p>
+                        </div>
+                        <i class="fas fa-spinner fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card stats-completed">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ completed_tasks }}</h3>
+                            <p class="mb-0">Completed</p>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-value text-success">{{ completion_rate }}%</div>
+                    <div class="metric-label">Completion Rate</div>
+                    <small class="text-muted">
+                        <i class="fas fa-arrow-up trend-up"></i> +5% from last month
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-value text-warning">{{ avg_completion_time }}</div>
+                    <div class="metric-label">Avg Completion (Days)</div>
+                    <small class="text-muted">
+                        <i class="fas fa-minus trend-stable"></i> No change
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-value text-danger">{{ overdue_tasks }}</div>
+                    <div class="metric-label">Overdue Tasks</div>
+                    <small class="text-muted">
+                        <i class="fas fa-arrow-down trend-down"></i> -2% from last week
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-value text-info">{{ active_employees }}</div>
+                    <div class="metric-label">Active Employees</div>
+                    <small class="text-muted">
+                        <i class="fas fa-arrow-up trend-up"></i> +1 new employee
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <!-- Task Status Distribution -->
+            <div class="col-md-6 mb-4">
+                <div class="card report-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Task Status Distribution
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Priority Distribution -->
+            <div class="col-md-6 mb-4">
+                <div class="card report-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-donut me-2"></i>Priority Distribution
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Creation Trend -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Task Creation Trend (Last 30 Days)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container chart-container-large">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Performance and Department Analysis -->
+        <div class="row mb-4">
+            <!-- Top Performing Employees -->
+            <div class="col-md-6 mb-4">
+                <div class="card report-card">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-medal me-2"></i>Top Performing Employees
+                            </h6>
+                            <small class="text-muted">By completion rate</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% for employee in top_employees %}
+                        <div class="performance-item performance-{{ employee.performance_class }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ employee.name }}</h6>
+                                    <small class="text-muted">{{ employee.department|default:"No Department" }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold">{{ employee.completion_rate }}%</span>
+                                    <br><small class="text-muted">{{ employee.completed_tasks }} completed</small>
+                                </div>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ employee.completion_rate }}%" 
+                                     aria-valuenow="{{ employee.completion_rate }}" 
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-2"></i>
+                            <p class="text-muted">No employee data available</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Analysis -->
+            <div class="col-md-6 mb-4">
+                <div class="card report-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-building me-2"></i>Department Performance
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% for dept in department_stats %}
+                        <div class="department-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">{{ dept.name|default:"Unassigned" }}</h6>
+                                    <span class="badge bg-primary">{{ dept.total_tasks }} tasks</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4 text-center">
+                                        <small class="text-muted d-block">Pending</small>
+                                        <span class="text-danger fw-bold">{{ dept.pending }}</span>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <small class="text-muted d-block">In Progress</small>
+                                        <span class="text-warning fw-bold">{{ dept.in_progress }}</span>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <small class="text-muted d-block">Completed</small>
+                                        <span class="text-success fw-bold">{{ dept.completed }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-building-slash fa-3x text-muted mb-2"></i>
+                            <p class="text-muted">No department data available</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity and Overdue Tasks -->
+        <div class="row mb-4">
+            <!-- Recent Activity -->
+            <div class="col-md-6 mb-4">
+                <div class="card report-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-history me-2"></i>Recent Activity
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            {% for activity in recent_activities %}
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 32px; height: 32px;">
+                                        <i class="fas fa-{{ activity.icon }} text-white fa-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1 fs-6">{{ activity.title }}</h6>
+                                    <p class="text-muted small mb-1">{{ activity.description }}</p>
+                                    <small class="text-muted">{{ activity.time }}</small>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-3">
+                                <i class="fas fa-history fa-3x text-muted mb-2"></i>
+                                <p class="text-muted">No recent activity</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overdue Tasks -->
+            <div class="col-md-6 mb-4">
+                <div class="card report-card border-danger">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Overdue Tasks Alert
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% for task in overdue_task_list %}
+                        <div class="alert alert-danger alert-sm mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="alert-heading mb-1">{{ task.title }}</h6>
+                                    <small>
+                                        Assigned to: {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                                        <br>Due: {{ task.due_date|date:"M d, Y g:i A" }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <span class="priority-indicator priority-{{ task.priority }}"></span>
+                                    <span class="badge bg-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                            <p class="text-muted">No overdue tasks! Great job!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Auto-hide alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                if (!alert.classList.contains('alert-danger')) {  // Don't auto-hide overdue alerts
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            });
+        }, 5000);
+
+        // Set default date range (last 30 days)
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            if (!document.getElementById('startDate').value) {
+                document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            }
+            if (!document.getElementById('endDate').value) {
+                document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            }
+        });
+
+        // Chart configurations
+        Chart.defaults.font.family = 'system-ui, -apple-system, "Segoe UI", Roboto';
+        Chart.defaults.color = '#6c757d';
+
+        // Status Distribution Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'In Progress', 'Completed'],
+                datasets: [{
+                    data: [{{ pending_tasks }}, {{ in_progress_tasks }}, {{ completed_tasks }}],
+                    backgroundColor: ['#dc3545', '#ffc107', '#28a745'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+
+        // Priority Distribution Chart
+        const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+        new Chart(priorityCtx, {
+            type: 'pie',
+            data: {
+                labels: ['High Priority', 'Medium Priority', 'Low Priority'],
+                datasets: [{
+                    data: [{{ high_priority }}, {{ medium_priority }}, {{ low_priority }}],
+                    backgroundColor: ['#dc3545', '#ffc107', '#28a745'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+
+        // Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ trend_labels|safe }},
+                datasets: [{
+                    label: 'Tasks Created',
+                    data: {{ trend_data|safe }},
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Export functions
+        function exportReport(format) {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating...';
+            btn.disabled = true;
+            
+            // Simulate export process
+            setTimeout(() => {
+                alert(`Report exported successfully as ${format.toUpperCase()}!`);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

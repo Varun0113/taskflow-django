@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - TaskFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-soft: #f3f8ff;
+            --ink-strong: #0c1b33;
+            --ink-muted: #5b6b83;
+            --brand-primary: #1f7ae0;
+            --brand-accent: #2ec4b6;
+            --brand-warn: #f97316;
+            --ring-soft: rgba(31, 122, 224, 0.2);
+            --error-bg: #fee2e2;
+            --error-border: #fecaca;
+            --error-text: #b91c1c;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at 10% 5%, rgba(46, 196, 182, 0.12), transparent 35%),
+                radial-gradient(circle at 90% 15%, rgba(255, 159, 74, 0.12), transparent 30%),
+                var(--bg-soft);
+            color: var(--ink-strong);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .page-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-container {
+            max-width: 1140px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(95deg, rgba(9, 22, 44, 0.92), rgba(10, 40, 66, 0.92));
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 8px 30px rgba(5, 14, 32, 0.3);
+        }
+
+        .nav .page-container {
+            max-width: none;
+            margin: 0;
+            padding: 0 16px;
+            width: 100%;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 72px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(31, 122, 224, 0.34);
+        }
+
+        .logo-icon svg {
+            width: 20px;
+            height: 20px;
+            color: #fff;
+        }
+
+        .logo-text {
+            font-family: "Sora", sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.03em;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 10px 18px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .nav-link-ghost {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .nav-link-ghost:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link-primary {
+            color: #fff;
+            background: linear-gradient(135deg, #1f7ae0, #1862b2);
+            box-shadow: 0 8px 20px rgba(31, 122, 224, 0.3);
+        }
+
+        .auth-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 126px 0 56px;
+            background: linear-gradient(115deg, #071a33 0%, #0a2745 40%, #10324f 72%, #12403d 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 16% 78%, rgba(46, 196, 182, 0.22) 0%, transparent 45%),
+                radial-gradient(circle at 86% 18%, rgba(255, 159, 74, 0.22) 0%, transparent 38%);
+            pointer-events: none;
+        }
+
+        .auth-shell {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(380px, 430px);
+            gap: clamp(18px, 2.6vw, 32px);
+            align-items: center;
+        }
+
+        .auth-panel {
+            color: #fff;
+            max-width: 620px;
+        }
+
+        .auth-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .auth-badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f97316;
+        }
+
+        .auth-badge-text {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 0.01em;
+        }
+
+        .auth-title {
+            font-family: "Sora", sans-serif;
+            font-size: clamp(2rem, 4.2vw, 3.1rem);
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 14px;
+        }
+
+        .auth-title-gradient {
+            background: linear-gradient(135deg, #ffd6b0, #ff9f4a, #89e7dd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-subtitle {
+            font-size: 1.04rem;
+            color: rgba(237, 244, 255, 0.88);
+            max-width: 540px;
+            margin-bottom: 26px;
+        }
+
+        .auth-points {
+            display: grid;
+            gap: 10px;
+            max-width: 510px;
+        }
+
+        .auth-point {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(243, 248, 255, 0.94);
+            font-size: 0.93rem;
+        }
+
+        .auth-point svg {
+            width: 18px;
+            height: 18px;
+            color: #89e7dd;
+            flex: 0 0 auto;
+        }
+
+        .login-container {
+            width: 100%;
+            background: linear-gradient(165deg, #ffffff, #f5fbff);
+            border: 1px solid rgba(18, 78, 133, 0.12);
+            border-radius: 20px;
+            box-shadow: 0 18px 42px rgba(10, 28, 52, 0.22);
+            padding: 34px 30px;
+            animation: riseIn 0.6s ease both;
+        }
+
+        .login-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .login-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--brand-warn), #ea580c);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            box-shadow: 0 12px 24px rgba(234, 88, 12, 0.28);
+        }
+
+        .login-icon svg {
+            width: 24px;
+            height: 24px;
+            color: #fff;
+        }
+
+        .login-title {
+            font-family: "Sora", sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--ink-strong);
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            font-size: 0.94rem;
+            color: var(--ink-muted);
+        }
+
+        .form-errors {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--error-border);
+            background: var(--error-bg);
+            color: var(--error-text);
+            font-size: 0.86rem;
+            line-height: 1.5;
+        }
+
+        .form-errors ul {
+            list-style: none;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.87rem;
+            font-weight: 600;
+            color: var(--ink-strong);
+            margin-bottom: 7px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #d6e3f3;
+            background: #f8fbff;
+            color: var(--ink-strong);
+            font-size: 0.94rem;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+            font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px var(--ring-soft);
+            background: #fff;
+        }
+
+        .form-group input::placeholder {
+            color: #8ba0bc;
+        }
+
+        .form-submit {
+            width: 100%;
+            margin-top: 12px;
+            padding: 13px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--brand-warn), #ea580c);
+            box-shadow: 0 14px 30px rgba(234, 88, 12, 0.3);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #fb923c, #dc4e10);
+            box-shadow: 0 16px 34px rgba(220, 78, 16, 0.35);
+        }
+
+        .form-submit:active {
+            transform: translateY(0);
+        }
+
+        .login-links {
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 1px solid #d6e3f3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .login-link {
+            font-size: 0.86rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--brand-primary);
+            transition: color 0.25s ease;
+        }
+
+        .login-link:hover {
+            color: #14589f;
+        }
+
+        .login-link-secondary {
+            color: #4f647f;
+        }
+
+        .login-link-secondary:hover {
+            color: var(--ink-strong);
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 980px) {
+            .auth-shell {
+                grid-template-columns: 1fr;
+                gap: 22px;
+            }
+
+            .auth-panel {
+                max-width: none;
+                text-align: center;
+            }
+
+            .auth-points {
+                margin: 0 auto;
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .auth-section {
+                padding-top: 108px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-container {
+                padding: 0 16px;
+            }
+
+            .login-container {
+                padding: 28px 20px;
+            }
+
+            .login-title {
+                font-size: 1.38rem;
+            }
+
+            .login-links {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav class="nav">
+            <div class="page-container">
+                <div class="nav-content">
+                    <a href="{% url 'landing_page' %}" class="logo">
+                        <div class="logo-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                        </div>
+                        <span class="logo-text">TaskFlow</span>
+                    </a>
+                    <div class="nav-links">
+                        <a href="{% url 'employee_login' %}" class="nav-link nav-link-ghost">Employee Login</a>
+                        <a href="{% url 'admin_login' %}" class="nav-link nav-link-primary">Admin Login</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <section class="auth-section">
+            <div class="page-container">
+                <div class="auth-shell">
+                    <div class="auth-panel">
+                        <div class="auth-badge">
+                            <span class="auth-badge-dot"></span>
+                            <span class="auth-badge-text">Administrator Access</span>
+                        </div>
+                        <h1 class="auth-title">Secure Control.<br><span class="auth-title-gradient">Manage Workflow.</span></h1>
+                        <p class="auth-subtitle">Sign in as admin to assign tasks, monitor team progress, and keep delivery on track.</p>
+                        <div class="auth-points">
+                            <div class="auth-point">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Create and assign tasks to employees instantly</span>
+                            </div>
+                            <div class="auth-point">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Track status, priorities, and due dates from one place</span>
+                            </div>
+                            <div class="auth-point">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Manage the entire team workspace securely</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="login-container">
+                        <div class="login-header">
+                            <div class="login-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v6c0 5-3.5 8-7 8s-7-3-7-8V7l7-4z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="login-title">Admin Login</h2>
+                            <p class="login-subtitle">Access your administrative dashboard</p>
+                        </div>
+
+                        {% if messages %}
+                            <div class="form-errors">
+                                <ul>
+                                    {% for message in messages %}
+                                        <li>{{ message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input
+                                    type="text"
+                                    id="username"
+                                    name="username"
+                                    placeholder="Enter admin username"
+                                    value="{{ request.POST.username|default:'' }}"
+                                    required
+                                    autocomplete="username"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    required
+                                    autocomplete="current-password"
+                                >
+                            </div>
+
+                            <button type="submit" class="form-submit">Sign In as Admin</button>
+                        </form>
+
+                        <div class="login-links">
+                            <a href="{% url 'employee_login' %}" class="login-link">Employee Login</a>
+                            <a href="{% url 'landing_page' %}" class="login-link login-link-secondary">Back to Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+

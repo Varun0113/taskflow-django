@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Tasks - TaskFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at 10% 5%, rgba(46,196,182,.12), transparent 35%), radial-gradient(circle at 90% 15%, rgba(255,159,74,.12), transparent 30%), #f3f8ff;
+            color: #0c1b33; min-height: 100vh;
+        }
+        .wrap { width: 100%; padding: 0 20px; }
+        .nav { position: sticky; top: 0; z-index: 50; background: linear-gradient(95deg, rgba(9,22,44,.92), rgba(10,40,66,.92)); border-bottom: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(12px); }
+        .nav-row { min-height: 72px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; gap: 10px; align-items: center; text-decoration: none; color: #fff; font-family: "Sora", sans-serif; font-weight: 700; font-size: 1.25rem; }
+        .logo-box { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,#1f7ae0,#2ec4b6); display: flex; align-items: center; justify-content: center; }
+        .nav-links { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .chip { color: #eef6ff; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 8px 12px; font-size: .84rem; background: rgba(255,255,255,.08); }
+        .link { text-decoration: none; border-radius: 10px; padding: 8px 12px; font-size: .82rem; font-weight: 700; }
+        .link-home { color: #fff; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08); }
+        .link-logout { color: #fff; background: linear-gradient(135deg,#f97316,#ea580c); }
+        .main { padding: 22px 0 30px; }
+        .msg { border-radius: 12px; padding: 10px 12px; font-size: .9rem; font-weight: 600; margin-bottom: 10px; }
+        .message-success { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+        .message-error, .message-danger { background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; }
+        .message-warning { background: #fef9c3; border: 1px solid #fde68a; color: #854d0e; }
+        .message-info { background: #dbeafe; border: 1px solid #93c5fd; color: #1d4ed8; }
+        .hero { border-radius: 20px; padding: 22px; margin-bottom: 14px; color: #fff; background: linear-gradient(115deg,#071a33 0%,#0a2745 40%,#10324f 72%,#12403d 100%); display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .badge { display: inline-flex; gap: 8px; align-items: center; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); padding: 7px 12px; font-size: .8rem; }
+        .dot { width: 8px; height: 8px; border-radius: 999px; background: #22c55e; }
+        .hero h1 { font-family: "Sora", sans-serif; font-size: clamp(1.45rem,3vw,1.9rem); line-height: 1.1; letter-spacing: -.03em; margin: 8px 0 4px; }
+        .accent { background: linear-gradient(135deg,#89e7dd,#5fb6ff,#ffe0a9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { color: rgba(237,244,255,.9); font-size: .92rem; }
+        .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .btn-main { text-decoration: none; color: #fff; border-radius: 10px; padding: 10px 12px; font-size: .82rem; font-weight: 800; background: linear-gradient(135deg,#1f7ae0,#1862b2); }
+        .btn-alt { text-decoration: none; color: #fff; border-radius: 10px; padding: 10px 12px; font-size: .82rem; font-weight: 800; background: linear-gradient(135deg,#14b8a6,#0f766e); }
+        .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+        .stat { border-radius: 14px; padding: 12px; color: #fff; }
+        .s1 { background: linear-gradient(135deg,#1f7ae0,#1862b2); } .s2 { background: linear-gradient(135deg,#ef4444,#b91c1c); } .s3 { background: linear-gradient(135deg,#0ea5e9,#0284c7); } .s4 { background: linear-gradient(135deg,#10b981,#0d9488); }
+        .k { font-size: .73rem; text-transform: uppercase; letter-spacing: .06em; opacity: .92; } .v { font-family: "Sora", sans-serif; font-size: 1.35rem; margin-top: 4px; }
+        .panel { border-radius: 16px; background: linear-gradient(165deg,#fff,#f5fbff); border: 1px solid rgba(18,78,133,.12); box-shadow: 0 16px 36px rgba(10,28,52,.08); padding: 14px; margin-bottom: 14px; }
+        .head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .title { font-family: "Sora", sans-serif; font-size: 1.02rem; letter-spacing: -.02em; color: #102744; }
+        .filters { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; align-items: end; }
+        .field label { display: block; font-size: .76rem; font-weight: 700; color: #284563; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
+        .field select { width: 100%; border: 1px solid #c8d8eb; border-radius: 10px; padding: 8px 10px; font-size: .84rem; background: #f8fbff; }
+        .f-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn { text-decoration: none; border-radius: 10px; padding: 8px 11px; font-size: .8rem; font-weight: 800; border: none; cursor: pointer; }
+        .btn-p { color: #fff; background: linear-gradient(135deg,#1f7ae0,#1862b2); } .btn-n { color: #21466f; border: 1px solid #c9dbef; background: #fff; }
+        .chips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .fchip { border-radius: 999px; font-size: .74rem; font-weight: 700; padding: 6px 9px; color: #fff; background: linear-gradient(135deg,#1f7ae0,#1862b2); }
+        .fchip a { color: #fff; text-decoration: none; }
+        .tbl-wrap { overflow-x: auto; border: 1px solid #dce8f6; border-radius: 12px; background: #fff; }
+        table { width: 100%; min-width: 940px; border-collapse: collapse; }
+        thead th { text-align: left; font-size: .76rem; text-transform: uppercase; letter-spacing: .05em; color: #59708e; background: #f3f8ff; border-bottom: 1px solid #dce8f6; padding: 10px 12px; }
+        tbody tr { border-left: 4px solid #c9dbef; }
+        .tp { border-left-color: #ef4444; } .tip { border-left-color: #f59e0b; } .tc { border-left-color: #10b981; }
+        tbody td { padding: 10px 12px; border-bottom: 1px solid #edf3fb; font-size: .84rem; color: #1f3e63; vertical-align: top; }
+        .tt { font-size: .9rem; font-weight: 800; color: #102744; } .tdesc { font-size: .8rem; color: #5b6b83; } .mut { font-size: .76rem; color: #6f8098; }
+        .status, .priority { display: inline-flex; border-radius: 999px; padding: 4px 8px; font-size: .74rem; font-weight: 700; }
+        .sp { background: #fee2e2; color: #b91c1c; } .sip { background: #fef3c7; color: #92400e; } .sc { background: #dcfce7; color: #166534; }
+        .priority { border-radius: 8px; border: 1px solid transparent; }
+        .ph { background: #ffe6e6; color: #b91c1c; border-color: #fecaca; } .pm { background: #fff7df; color: #92400e; border-color: #fde68a; } .pl { background: #dcfce7; color: #166534; border-color: #86efac; }
+        .due { font-size: .75rem; font-weight: 700; margin-top: 2px; } .over { color: #b91c1c; } .today { color: #b45309; }
+        .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tbtn { text-decoration: none; border: 1px solid #c9dbef; background: #fff; color: #21466f; border-radius: 8px; font-size: .74rem; font-weight: 700; padding: 6px 8px; }
+        .tbtn-d { border-color: #fecaca; color: #b91c1c; background: #fff5f5; }
+        .pg { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .pgl { display: flex; gap: 6px; list-style: none; }
+        .pga { text-decoration: none; border: 1px solid #c9dbef; border-radius: 8px; padding: 6px 9px; font-size: .78rem; font-weight: 700; color: #21466f; background: #fff; }
+        .pga.active { color: #fff; border-color: transparent; background: linear-gradient(135deg,#1f7ae0,#1862b2); }
+        .empty { border: 1px dashed #bfd5ec; border-radius: 12px; background: #f8fcff; color: #5c718d; text-align: center; padding: 28px 14px; }
+        @media (max-width: 1100px) { .hero { flex-direction: column; align-items: flex-start; } .stats, .filters { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+        @media (max-width: 720px) { .wrap { padding: 0 14px; } .main { padding-top: 16px; } .chip { display: none; } .stats, .filters { grid-template-columns: 1fr; } .pg { flex-direction: column; align-items: flex-start; } }
+    </style>
+</head>
+<body>
+    {% now "Y-m-d" as today %}
+    <nav class="nav">
+        <div class="wrap">
+            <div class="nav-row">
+                <a class="logo" href="{% url 'admin_dashboard' %}">
+                    <span class="logo-box"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></span>
+                    <span>TaskFlow</span>
+                </a>
+                <div class="nav-links">
+                    <span class="chip">{{ user.get_full_name|default:user.username }}</span>
+                    <a class="link link-home" href="{% url 'admin_dashboard' %}">Dashboard</a>
+                    <a class="link link-logout" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="wrap">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="msg message-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <section class="hero">
+                <div>
+                    <span class="badge"><span class="dot"></span> Task Oversight</span>
+                    <h1>View All Tasks.<br><span class="accent">Control Delivery.</span></h1>
+                    <p>Filter by status, priority, and owner to quickly find work that needs attention.</p>
+                </div>
+                <div class="hero-actions">
+                    <a href="{% url 'assign_task' %}" class="btn-main">Assign New Task</a>
+                    <a href="{% url 'admin_employees' %}" class="btn-alt">View Employees</a>
+                </div>
+            </section>
+
+            <section class="stats">
+                <article class="stat s1"><div class="k">Total Tasks</div><div class="v">{{ page_obj.paginator.count }}</div></article>
+                <article class="stat s2"><div class="k">Showing</div><div class="v">{{ page_obj.object_list|length }}</div></article>
+                <article class="stat s3"><div class="k">Employees</div><div class="v">{{ employees.count }}</div></article>
+                <article class="stat s4"><div class="k">Today</div><div class="v">{% now "M d" %}</div></article>
+            </section>
+
+            <section class="panel">
+                <div class="head"><h2 class="title">Filter Tasks</h2></div>
+                <form method="get" class="filters">
+                    <div class="field">
+                        <label for="status">Status</label>
+                        <select name="status" id="status">
+                            <option value="">All Status</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="priority">Priority</label>
+                        <select name="priority" id="priority">
+                            <option value="">All Priorities</option>
+                            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="employee">Employee</label>
+                        <select name="employee" id="employee">
+                            <option value="">All Employees</option>
+                            {% for emp in employees %}
+                                <option value="{{ emp.id }}" {% if employee_filter == emp.id|stringformat:'s' %}selected{% endif %}>{{ emp.get_full_name|default:emp.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="f-actions">
+                        <button type="submit" class="btn btn-p">Apply</button>
+                        <a href="{% url 'all_tasks' %}" class="btn btn-n">Clear</a>
+                    </div>
+                </form>
+
+                {% if status_filter or priority_filter or employee_filter %}
+                    <div class="chips">
+                        {% if status_filter %}
+                            <span class="fchip">Status: {{ status_filter|title }} <a href="?{% if priority_filter %}priority={{ priority_filter }}&{% endif %}{% if employee_filter %}employee={{ employee_filter }}{% endif %}">x</a></span>
+                        {% endif %}
+                        {% if priority_filter %}
+                            <span class="fchip">Priority: {{ priority_filter|title }} <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if employee_filter %}employee={{ employee_filter }}{% endif %}">x</a></span>
+                        {% endif %}
+                        {% if employee_filter %}
+                            <span class="fchip">Employee: {{ selected_employee.get_full_name|default:selected_employee.username|default:"Unknown" }} <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if priority_filter %}priority={{ priority_filter }}{% endif %}">x</a></span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="panel">
+                <div class="head"><h2 class="title">Tasks ({{ page_obj.paginator.count }} total)</h2></div>
+                {% if page_obj %}
+                    <div class="tbl-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Task</th><th>Assigned To</th><th>Status</th><th>Priority</th><th>Due Date</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for task in page_obj %}
+                                    <tr class="{% if task.status == 'pending' %}tp{% elif task.status == 'in_progress' %}tip{% else %}tc{% endif %}">
+                                        <td>
+                                            <div class="tt">{{ task.title }}</div>
+                                            <div class="tdesc">{{ task.description|truncatewords:12 }}</div>
+                                            <div class="mut">by {{ task.assigned_by.get_full_name|default:task.assigned_by.username }}</div>
+                                        </td>
+                                        <td>
+                                            <div>{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</div>
+                                            <div class="mut">{{ task.assigned_to.email }}</div>
+                                            {% if task.assigned_to.userprofile.department %}<div class="mut">{{ task.assigned_to.userprofile.department }}</div>{% endif %}
+                                        </td>
+                                        <td><span class="status {% if task.status == 'pending' %}sp{% elif task.status == 'in_progress' %}sip{% else %}sc{% endif %}">{{ task.get_status_display }}</span></td>
+                                        <td><span class="priority {% if task.priority == 'high' %}ph{% elif task.priority == 'medium' %}pm{% else %}pl{% endif %}">{{ task.get_priority_display }}</span></td>
+                                        <td>
+                                            <div>{{ task.due_date|date:"M d, Y" }}</div>
+                                            <div class="mut">{{ task.due_date|date:"g:i A" }}</div>
+                                            {% if task.due_date|date:"Y-m-d" < today and task.status != 'completed' %}
+                                                <div class="due over">Overdue</div>
+                                            {% elif task.due_date|date:"Y-m-d" == today and task.status != 'completed' %}
+                                                <div class="due today">Due Today</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="acts">
+                                                <a href="{% url 'task_details' task.id %}" class="tbtn">View</a>
+                                                <a href="{% url 'edit_task' task.id %}" class="tbtn">Edit</a>
+                                                <a href="{% url 'delete_task' task.id %}" class="tbtn tbtn-d" onclick="return confirm('Are you sure you want to delete this task?')">Delete</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if page_obj.has_other_pages %}
+                        <div class="pg">
+                            <small class="mut">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} tasks</small>
+                            <ul class="pgl">
+                                {% if page_obj.has_previous %}
+                                    <li><a class="pga" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if employee_filter %}&employee={{ employee_filter }}{% endif %}">&laquo;</a></li>
+                                    <li><a class="pga" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if employee_filter %}&employee={{ employee_filter }}{% endif %}">&lsaquo;</a></li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li><span class="pga active">{{ num }}</span></li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li><a class="pga" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if employee_filter %}&employee={{ employee_filter }}{% endif %}">{{ num }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li><a class="pga" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if employee_filter %}&employee={{ employee_filter }}{% endif %}">&rsaquo;</a></li>
+                                    <li><a class="pga" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if employee_filter %}&employee={{ employee_filter }}{% endif %}">&raquo;</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty">
+                        {% if status_filter or priority_filter or employee_filter %}
+                            <p>No tasks match your filters. <a href="{% url 'all_tasks' %}">Clear filters</a>.</p>
+                        {% else %}
+                            <p>No tasks found. <a href="{% url 'assign_task' %}">Create your first task</a>.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </section>
+
+        </div>
+    </main>
+</body>
+</html>

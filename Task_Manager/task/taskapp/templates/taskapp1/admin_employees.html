@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees - TaskFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at 10% 5%, rgba(46, 196, 182, 0.12), transparent 35%),
+                radial-gradient(circle at 90% 15%, rgba(255, 159, 74, 0.12), transparent 30%),
+                #f3f8ff;
+            color: #0c1b33;
+            min-height: 100vh;
+        }
+        .wrap { width: 100%; padding: 0 20px; }
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: linear-gradient(95deg, rgba(9, 22, 44, 0.92), rgba(10, 40, 66, 0.92));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(12px);
+        }
+        .nav-row { min-height: 72px; display: flex; justify-content: space-between; align-items: center; }
+        .logo {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            text-decoration: none;
+            color: #fff;
+            font-family: "Sora", sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .logo-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1f7ae0, #2ec4b6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-links { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .chip {
+            color: #eef6ff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.84rem;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .link {
+            text-decoration: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+        .link-home { color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.08); }
+        .link-tasks { color: #fff; background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .link-logout { color: #fff; background: linear-gradient(135deg, #f97316, #ea580c); }
+
+        .main { padding: 22px 0 30px; }
+        .msg { border-radius: 12px; padding: 10px 12px; font-size: 0.9rem; font-weight: 600; margin-bottom: 10px; }
+        .message-success { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+        .message-error, .message-danger { background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; }
+        .message-warning { background: #fef9c3; border: 1px solid #fde68a; color: #854d0e; }
+        .message-info { background: #dbeafe; border: 1px solid #93c5fd; color: #1d4ed8; }
+
+        .hero {
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 14px;
+            color: #fff;
+            background: linear-gradient(115deg, #071a33 0%, #0a2745 40%, #10324f 72%, #12403d 100%);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 7px 12px;
+            font-size: 0.8rem;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 999px; background: #22c55e; }
+        .hero h1 {
+            font-family: "Sora", sans-serif;
+            font-size: clamp(1.45rem, 3vw, 1.9rem);
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin: 8px 0 4px;
+        }
+        .accent {
+            background: linear-gradient(135deg, #89e7dd, #5fb6ff, #ffe0a9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p { color: rgba(237, 244, 255, 0.9); font-size: 0.92rem; }
+        .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-main, .btn-alt {
+            text-decoration: none;
+            color: #fff;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+        .btn-main { background: linear-gradient(135deg, #1f7ae0, #1862b2); }
+        .btn-alt { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .stat { border-radius: 14px; padding: 12px; color: #fff; }
+        .s1 { background: linear-gradient(135deg, #1f7ae0, #1862b2); }
+        .s2 { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .s3 { background: linear-gradient(135deg, #10b981, #0d9488); }
+        .k { font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.92; }
+        .v { font-family: "Sora", sans-serif; font-size: 1.35rem; margin-top: 4px; }
+
+        .panel {
+            border-radius: 16px;
+            background: linear-gradient(165deg, #fff, #f5fbff);
+            border: 1px solid rgba(18, 78, 133, 0.12);
+            box-shadow: 0 16px 36px rgba(10, 28, 52, 0.08);
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+        .head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-family: "Sora", sans-serif;
+            font-size: 1.02rem;
+            letter-spacing: -0.02em;
+            color: #102744;
+        }
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+        .field label {
+            display: block;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #284563;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .field input,
+        .field select {
+            width: 100%;
+            border: 1px solid #c8d8eb;
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.84rem;
+            background: #f8fbff;
+        }
+        .f-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            text-decoration: none;
+            border-radius: 10px;
+            padding: 8px 11px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-p { color: #fff; background: linear-gradient(135deg, #1f7ae0, #1862b2); }
+        .btn-n { color: #21466f; border: 1px solid #c9dbef; background: #fff; }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .card {
+            border: 1px solid #dce8f6;
+            border-radius: 14px;
+            background: #fff;
+            padding: 12px;
+        }
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .name {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #102744;
+            line-height: 1.2;
+        }
+        .uname { font-size: 0.76rem; color: #5c718d; margin-top: 2px; }
+        .emp-id {
+            border-radius: 999px;
+            border: 1px solid #c9dbef;
+            background: #f3f8ff;
+            color: #21466f;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .meta { font-size: 0.78rem; color: #4d5e76; line-height: 1.4; margin-bottom: 8px; }
+        .task-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .tm {
+            border-radius: 9px;
+            border: 1px solid #dce8f6;
+            background: #f8fbff;
+            text-align: center;
+            padding: 6px 4px;
+        }
+        .tm-k { display: block; font-size: 0.65rem; color: #59708e; text-transform: uppercase; letter-spacing: 0.04em; }
+        .tm-v { display: block; font-size: 0.88rem; font-weight: 800; color: #183759; }
+        .bar {
+            width: 100%;
+            height: 7px;
+            border-radius: 999px;
+            background: #e2edf9;
+            overflow: hidden;
+        }
+        .bar > span {
+            display: block;
+            height: 100%;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+        }
+        .bar-label { font-size: 0.72rem; color: #5c718d; margin-top: 5px; }
+
+        .pg { margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .mut { font-size: 0.76rem; color: #6f8098; }
+        .pgl { display: flex; gap: 6px; list-style: none; }
+        .pga { text-decoration: none; border: 1px solid #c9dbef; border-radius: 8px; padding: 6px 9px; font-size: 0.78rem; font-weight: 700; color: #21466f; background: #fff; }
+        .pga.active { color: #fff; border-color: transparent; background: linear-gradient(135deg, #1f7ae0, #1862b2); }
+
+        .empty {
+            border: 1px dashed #bfd5ec;
+            border-radius: 12px;
+            background: #f8fcff;
+            color: #5c718d;
+            text-align: center;
+            padding: 28px 14px;
+        }
+
+        @media (max-width: 1100px) {
+            .hero { flex-direction: column; align-items: flex-start; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .filters { grid-template-columns: 1fr 1fr; }
+            .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 720px) {
+            .wrap { padding: 0 14px; }
+            .main { padding-top: 16px; }
+            .chip { display: none; }
+            .stats, .filters, .cards { grid-template-columns: 1fr; }
+            .task-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .pg { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="wrap">
+            <div class="nav-row">
+                <a class="logo" href="{% url 'admin_dashboard' %}">
+                    <span class="logo-box">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="18" height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </span>
+                    <span>TaskFlow</span>
+                </a>
+                <div class="nav-links">
+                    <span class="chip">{{ user.get_full_name|default:user.username }}</span>
+                    <a class="link link-home" href="{% url 'admin_dashboard' %}">Dashboard</a>
+                    <a class="link link-tasks" href="{% url 'all_tasks' %}">All Tasks</a>
+                    <a class="link link-logout" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="wrap">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="msg message-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <section class="hero">
+                <div>
+                    <span class="badge"><span class="dot"></span> Team Directory</span>
+                    <h1>View Employees.<br><span class="accent">Track Capacity.</span></h1>
+                    <p>Dedicated employee view with search, department filter, and workload snapshot.</p>
+                </div>
+                <div class="hero-actions">
+                    <a href="{% url 'assign_task' %}" class="btn-main">Assign New Task</a>
+                    <a href="{% url 'admin_add_employee' %}" class="btn-alt">Add Employee</a>
+                </div>
+            </section>
+
+            <section class="stats">
+                <article class="stat s1"><div class="k">Total Employees</div><div class="v">{{ total_employees }}</div></article>
+                <article class="stat s2"><div class="k">Showing</div><div class="v">{{ filtered_count }}</div></article>
+                <article class="stat s3"><div class="k">Departments</div><div class="v">{{ departments|length }}</div></article>
+            </section>
+
+            <section class="panel">
+                <div class="head"><h2 class="title">Filter Employees</h2></div>
+                <form method="get" class="filters">
+                    <div class="field">
+                        <label for="q">Search</label>
+                        <input id="q" name="q" type="text" value="{{ search_query }}" placeholder="Name, username, or email">
+                    </div>
+                    <div class="field">
+                        <label for="department">Department</label>
+                        <select id="department" name="department">
+                            <option value="">All Departments</option>
+                            {% for department in departments %}
+                                <option value="{{ department }}" {% if department_filter == department %}selected{% endif %}>{{ department }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="f-actions">
+                        <button class="btn btn-p" type="submit">Apply</button>
+                        <a href="{% url 'admin_employees' %}" class="btn btn-n">Clear</a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="head"><h2 class="title">Employees</h2></div>
+                {% if page_obj %}
+                    <div class="cards">
+                        {% for employee in page_obj %}
+                            <article class="card">
+                                <div class="card-top">
+                                    <div>
+                                        <div class="name">{{ employee.get_full_name|default:employee.username }}</div>
+                                        <div class="uname">@{{ employee.username }}</div>
+                                    </div>
+                                    <span class="emp-id">{{ employee.userprofile.employee_id|default:"N/A" }}</span>
+                                </div>
+                                <div class="meta">
+                                    <div>{{ employee.email|default:"No email" }}</div>
+                                    <div>Dept: {{ employee.userprofile.department|default:"Not set" }}</div>
+                                    <div>Phone: {{ employee.userprofile.phone|default:"Not set" }}</div>
+                                </div>
+                                <div class="task-metrics">
+                                    <div class="tm"><span class="tm-k">Total</span><span class="tm-v">{{ employee.total_tasks }}</span></div>
+                                    <div class="tm"><span class="tm-k">Pending</span><span class="tm-v">{{ employee.pending_tasks }}</span></div>
+                                    <div class="tm"><span class="tm-k">In Progress</span><span class="tm-v">{{ employee.in_progress_tasks }}</span></div>
+                                    <div class="tm"><span class="tm-k">Done</span><span class="tm-v">{{ employee.completed_tasks }}</span></div>
+                                </div>
+                                {% if employee.total_tasks %}
+                                    {% widthratio employee.completed_tasks employee.total_tasks 100 as completion_percent %}
+                                {% else %}
+                                    {% widthratio 0 1 100 as completion_percent %}
+                                {% endif %}
+                                <div class="bar"><span style="width: {{ completion_percent }}%"></span></div>
+                                <div class="bar-label">{{ completion_percent }}% completion</div>
+                            </article>
+                        {% endfor %}
+                    </div>
+
+                    {% if page_obj.has_other_pages %}
+                        <div class="pg">
+                            <small class="mut">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} employees</small>
+                            <ul class="pgl">
+                                {% if page_obj.has_previous %}
+                                    <li><a class="pga" href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">&laquo;</a></li>
+                                    <li><a class="pga" href="?page={{ page_obj.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">&lsaquo;</a></li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li><span class="pga active">{{ num }}</span></li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li><a class="pga" href="?page={{ num }}{% if query_string %}&{{ query_string }}{% endif %}">{{ num }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li><a class="pga" href="?page={{ page_obj.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">&rsaquo;</a></li>
+                                    <li><a class="pga" href="?page={{ page_obj.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">&raquo;</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty">
+                        <p>No employees found for selected filters.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+</body>
+</html>
